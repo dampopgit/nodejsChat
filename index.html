@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My First Node Chat App</title>
+
+  <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- Popper JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<style>
+  .blueText {
+    text-align:left;
+    color: #00F;
+    display:block;
+}
+.greenText {
+  text-align:right;
+    color: #0F0;
+    display:block;
+
+}
+img {
+  border-radius: 50%;
+}
+.spacial{
+  display:inline;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <br>
+    <div class="jumbotron">
+        <h1 class="display-4">Send Message</h1>
+        <br>
+        <input id = "name" class="form-control" placeholder="Name">
+        <br>
+        <textarea id = "message" class="form-control" placeholder="Your Message Here"></textarea>
+        <br>
+        <button id="send" class="btn btn-success">Send</button>
+    </div>
+    <div id="messages">
+
+    </div>
+</div>
+<script>
+  var socket = io();
+      $(() => {
+          $("#send").click(()=>{
+              sendMessage({name: $("#name").val(), message: $("#message").val()});
+          })
+          getMessages();
+
+      })
+      socket.on('message', addMessages)
+      function addMessages(message){
+
+        if ($("li").length % 2 === 0) {
+         $("#messages").append(` <li class='blueText'> <img src="//unsplash.it/50/50"/> ${message.name} </li>  <p class='blueText'> ${message.message} </p> <span class='blueText'>Posted on:  ${message.time.slice(0, 10) } <span class='spacial'> at: ${message.time.slice(11, 19) }</span> </span>`)
+      }
+     else {
+       $("#messages").append(` <li class='greenText'> ${message.name}  <img src="//unsplash.it/50/50"/> </li> <p class='greenText' > ${message.message} </p> <span class='greenText'>Posted on:  ${message.time.slice(0, 10) } <span class='spacial'> at: ${message.time.slice(11, 19) }</span> </span>`)
+      }}
+
+  //function addMessages(message){
+//  const messageClass = message.user === currentUser ? 'blueText' : 'greenText'
+
+  //$("#messages").append(`<li class="${messageClass}"> ${message.name} </li> <p>
+//  ${message.message} </p> <span> ${message.id} </span>`)
+//}
+      function getMessages(){
+        $.get('http://localhost:3000/messages', (data) => {
+
+          data.forEach(addMessages);
+          console.log(data);
+        })
+      }
+      function sendMessage(message){
+        $.post('http://localhost:3000/messages', message);
+      //  console.log(message); // {name: "this", message: "that"}
+      }
+</script>
+</body>
+</html>
