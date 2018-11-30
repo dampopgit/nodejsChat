@@ -32,8 +32,27 @@
 img {
   border-radius: 50%;
 }
+#messages{
+  height: 250px;
+  overflow:scroll;
+}
 .spacial{
   display:inline;
+}
+li{
+  transition: 1s;
+  transform:translateY: 1000px !important;
+}
+.coming{
+  transition: 1s;
+  transform:translateY: 0px !important;
+}
+.jumbotron {
+  max-height: 300px;margin: 5px auto;padding :15px;
+}
+
+.display-4 {
+  font-size 1em; margin: 5px auto;
 }
 </style>
 </head>
@@ -45,16 +64,20 @@ img {
         <br>
         <input id = "name" class="form-control" placeholder="Name">
         <br>
-        <textarea id = "message" class="form-control" placeholder="Your Message Here"></textarea>
+        <textarea id = "message" class="form-control" placeholder="Your Message Here" maxlength="50"></textarea>
         <br>
         <button id="send" class="btn btn-success">Send</button>
     </div>
-    <div id="messages">
 
-    </div>
+</div>
+<div id="messages">
+  <div id="textdiv">
+</div>
 </div>
 <script>
   var socket = io();
+
+  socket.emit('clientEvent', 'Sent an event from the client!');
       $(() => {
           $("#send").click(()=>{
               sendMessage({name: $("#name").val(), message: $("#message").val()});
@@ -63,13 +86,33 @@ img {
 
       })
       socket.on('message', addMessages)
+      socket.on('testerEvent', function(data){
+console.log(data);
+
+ $("#textdiv").append(` <li class='blueText'> ${data.description} </li> `);
+        });
+
+        socket.on('disconnect', function(data){
+  console.log(data);
+
+   $("#textdiv").append(` <li class='blueText'> ${data.description} </li> `);
+          });
+
+
+
+
+
       function addMessages(message){
 
-        if ($("li").length % 2 === 0) {
-         $("#messages").append(` <li class='blueText'> <img src="//unsplash.it/50/50"/> ${message.name} </li>  <p class='blueText'> ${message.message} </p> <span class='blueText'>Posted on:  ${message.time.slice(0, 10) } <span class='spacial'> at: ${message.time.slice(11, 19) }</span> </span>`)
+      if ($("li").length % 2 === 0) {
+         $("#textdiv").append(` <li class='blueText'> <img src="//unsplash.it/50/50"/> ${message.name} </li>  <p class='blueText'> ${message.message} </p> <span class='blueText'>Posted on: ${message.time.slice(0, 10) } <span class='spacial'> at: ${message.time.slice(11, 19) }</span> </span>`);
+        $("#messages").scrollTop($("#textdiv").outerHeight());
+    $("#textdiv").fadeOut(0).fadeIn(600);
       }
-     else {
-       $("#messages").append(` <li class='greenText'> ${message.name}  <img src="//unsplash.it/50/50"/> </li> <p class='greenText' > ${message.message} </p> <span class='greenText'>Posted on:  ${message.time.slice(0, 10) } <span class='spacial'> at: ${message.time.slice(11, 19) }</span> </span>`)
+    else {
+       $("#textdiv").append(` <li class='greenText'> ${message.name}  <img src="//unsplash.it/50/50"/> </li> <p class='greenText' > ${message.message} </p> <span class='greenText'>Posted on:  ${message.time.slice(0, 10) } <span class='spacial'> at: ${message.time.slice(11, 19) }</span> </span>`);
+       $("#messages").scrollTop($("#textdiv").outerHeight());
+  $("#textdiv").fadeOut(0).fadeIn(600);
       }}
 
   //function addMessages(message){

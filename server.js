@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 var Message = mongoose.model('Message',{
   name : String,
   message : String,
-  userimage: String,
+  //userimage: String,
   time : { type : Date, default: Date.now }
 })
 
@@ -62,9 +62,24 @@ app.post('/messages', async (req, res) => {
 
 
 
-io.on('connection', () =>{
-  console.log('a user is connected')
+io.on('connection', (socket) =>{
+  console.log('a user is connected', socket.id);
+
+  setTimeout(function() {
+  //  Sending an object when emmiting an event
+    socket.emit('testerEvent', { description: 'A custom event named testerEvent!'});
+ }, 4000);
+
+ socket.on('clientEvent', function(data) {
+      console.log(data);
+  socket.on('disconnect', function(){
+    console.log('user disconnected', socket.id);
+    socket.emit('leaving', { description: socket.id + 'Has left the chat room!'});
+  });
 })
+});
+
+
 
 mongoose.connect(dbUrl ,{ useNewUrlParser: true } ,(err) => {
   console.log('mongodb connected',err);
