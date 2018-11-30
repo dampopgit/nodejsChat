@@ -64,9 +64,10 @@ app.post('/messages', async (req, res) => {
 
 io.on('connection', (socket) =>{
   console.log('a user is connected', socket.id);
-
+  socket.emit('newEntry', { userID: socket.id,
+     description: 'Has joined the chat room!'
+});
   setTimeout(function() {
-  //  Sending an object when emmiting an event
     socket.emit('testerEvent', { description: 'A custom event named testerEvent!'});
  }, 4000);
 
@@ -74,7 +75,9 @@ io.on('connection', (socket) =>{
       console.log(data);
   socket.on('disconnect', function(){
     console.log('user disconnected', socket.id);
-    socket.emit('leaving', { description: socket.id + 'Has left the chat room!'});
+    socket.emit('leaving', { userID: socket.id,
+      description: 'Has left the chat room!'
+  });
   });
 })
 });

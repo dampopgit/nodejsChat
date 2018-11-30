@@ -92,11 +92,17 @@ console.log(data);
  $("#textdiv").append(` <li class='blueText'> ${data.description} </li> `);
         });
 
-        socket.on('disconnect', function(data){
+        socket.on('leaving', function(data){
   console.log(data);
 
-   $("#textdiv").append(` <li class='blueText'> ${data.description} </li> `);
+   $("#textdiv").append(` <li class='blueText'> User ${data.userID}  ${data.description} </li> `);
           });
+
+          socket.on('newEntry', function(data){
+    console.log(data);
+
+     $("#textdiv").append(` <li class='blueText'> User ${data.userID}  ${data.description} </li> `);
+            });
 
 
 
