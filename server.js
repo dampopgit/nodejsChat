@@ -68,6 +68,10 @@ io.on('connection', (socket) =>{
      description: 'Has joined the chat room!'
 });
 
+socket.on("typing", function(data){
+  socket.broadcast.emit('typing', data)
+})
+
  socket.on('newUser',function (username) {
       socket.username = username;
  });

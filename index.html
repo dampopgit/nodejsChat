@@ -53,6 +53,20 @@ transform: translateX(-50%) translateY(-100%) ;
   padding: 5px 10px;border-radius: 5px;
   padding-bottom:19px;
   background: rgba(0,255,0,.3);
+  opacity:0;border:green solid 1px;
+}
+
+#feedback{
+  position:absolute;
+  transition: all .5s;
+  width:60%;
+  left: 50%;
+-webkit-transform: translateX(-50%) translateY(-100%) ;
+transform: translateX(-50%) translateY(-100%) ;
+  text-align:center;
+  padding: 5px 10px;border-radius: 5px;
+  padding-bottom:19px;
+  background: rgba(0,0,255,.3);
   opacity:1;border:green solid 1px;
 }
 .add_keyframe{
@@ -88,13 +102,13 @@ li{
 </style>
 </head>
 <body>
-  <div id="status" class="out"></div>
+  <div id="status"></div><div id="feedback"></div>
 <div class="container">
     <br>
     <div class="jumbotron">
 
 
-        <input id = "name" class="form-control" placeholder="Enter a Username">
+        <input id = "name" class="form-control" placeholder="Enter a Username" required>
         <br>
         <textarea id = "message" class="form-control" placeholder="Your Message Here" maxlength="50"></textarea>
         <br>
@@ -149,14 +163,49 @@ setTimeout(function() {
     });
 
 
+    // user is typing fucntionlity
+
+    $("#message").keypress(function(event) {
+
+
+    socket.emit('typing', $("#name").val() );
+
+
+ socket.on('typing', function(data){
+console.log(data, "is typing");
+
+ $("#feedback").html(`User ${data} is typing a message`);
+ $("#feedback").addClass("add_keyframe");
+ setTimeout(function() {
+   $("#feedback").removeClass("add_keyframe");
+   $("#feedback").empty();
+ }, 1000);
+     });
+
+
+
+
+
+});
+
+
    // this is code for mongoDB
 
       $(() => {
           $("#send").click(()=>{
+            if ($("#name").val()==""){
+              $(this).html("please enter a username first");
+              $(this).blur();
+              $("#name").focus();
+            }
+
+            else{
               sendMessage({name: $("#name").val(), message: $("#message").val()});
               var username = $("#name").val();
               socket.emit("newUser", username);
-              
+            }
+
+
           })
           getMessages();
 
