@@ -21,6 +21,7 @@
   .blueText {
     text-align:left;
     color: #00F;
+
     display:block;
 }
 .greenText {
@@ -33,36 +34,67 @@ img {
   border-radius: 50%;
 }
 #messages{
-  height: 250px;
+  height: 300px;
   overflow:scroll;
+  border:grey 1px solid; border-radius: 3px;
+  padding: 10px;
+  width: 90%;
+  margin: 5px auto;
 }
+
+#status{
+  position:absolute;
+  transition: all .5s;
+  width:60%;
+  left: 50%;
+-webkit-transform: translateX(-50%) translateY(-100%) ;
+transform: translateX(-50%) translateY(-100%) ;
+  text-align:center;
+  padding: 5px 10px;border-radius: 5px;
+  padding-bottom:19px;
+  background: rgba(0,255,0,.3);
+  opacity:1;border:green solid 1px;
+}
+.add_keyframe{
+  animation: move 5s;
+
+}
+
+@keyframes move {
+  0%, 100% {
+    transform: translateY(-100%) translateX(-50%);;
+  }
+  20% {
+    transform: translateY(0) translateX(-50%);opacity:1;
+  }
+}
+
 .spacial{
   display:inline;
 }
 li{
   transition: 1s;
-  transform:translateY: 1000px !important;
+  transform:translateY: 1000px !important;list-style-type: none;
 }
 .coming{
   transition: 1s;
   transform:translateY: 0px !important;
 }
 .jumbotron {
-  max-height: 300px;margin: 5px auto;padding :15px;
+  max-height: 300px;margin: 35px auto;padding :15px; boerder-radius:5px;
 }
 
-.display-4 {
-  font-size 1em; margin: 5px auto;
-}
+
 </style>
 </head>
 <body>
+  <div id="status" class="out"></div>
 <div class="container">
     <br>
     <div class="jumbotron">
-        <h1 class="display-4">Send Message</h1>
-        <br>
-        <input id = "name" class="form-control" placeholder="Name">
+
+
+        <input id = "name" class="form-control" placeholder="Enter a Username">
         <br>
         <textarea id = "message" class="form-control" placeholder="Your Message Here" maxlength="50"></textarea>
         <br>
@@ -77,56 +109,80 @@ li{
 <script>
   var socket = io();
 
-  socket.emit('clientEvent', 'Sent an event from the client!');
+  socket.emit('clientEvent', 'Sent an event from the client!'); // works
+
+ // works
+  socket.on('testerEvent', function(data){
+console.log(data);
+
+$("#textdiv").append(` <li class='blueText'> ${data.description} </li> `);
+    });
+
+
+
+    // works
+
+
+    socket.on('newEntry', function(data){
+console.log(data);
+
+$("#status").append(` <li class='in'> User ${data.userID}  ${data.description} </li> `);
+$("#status").addClass("add_keyframe");
+setTimeout(function() {
+  $("#status").removeClass("add_keyframe");
+  $("#status").empty();
+}, 4000);
+
+});
+
+
+
+socket.on('leaving', function(data){
+console.log(data);
+
+$("#status").append(` <li class='in'> User ${data.userID}  ${data.description} </li> `);
+$("#status").addClass("add_keyframe");
+setTimeout(function() {
+  $("#status").removeClass("add_keyframe");
+  $("#status").empty();
+}, 4000);
+    });
+
+
+   // this is code for mongoDB
+
       $(() => {
           $("#send").click(()=>{
               sendMessage({name: $("#name").val(), message: $("#message").val()});
+              var username = $("#name").val();
+              socket.emit("newUser", username);
+              
           })
           getMessages();
 
       })
+
       socket.on('message', addMessages)
-      socket.on('testerEvent', function(data){
-console.log(data);
-
- $("#textdiv").append(` <li class='blueText'> ${data.description} </li> `);
-        });
-
-        socket.on('leaving', function(data){
-  console.log(data);
-
-   $("#textdiv").append(` <li class='blueText'> User ${data.userID}  ${data.description} </li> `);
-          });
-
-          socket.on('newEntry', function(data){
-    console.log(data);
-
-     $("#textdiv").append(` <li class='blueText'> User ${data.userID}  ${data.description} </li> `);
-            });
-
 
 
 
 
       function addMessages(message){
-
+        var fullDate = new Date($.now()).toString();
+ var datePartialTime = fullDate.slice(16, 25);
+ var datePartialDate = fullDate.slice(0, 16);
       if ($("li").length % 2 === 0) {
-         $("#textdiv").append(` <li class='blueText'> <img src="//unsplash.it/50/50"/> ${message.name} </li>  <p class='blueText'> ${message.message} </p> <span class='blueText'>Posted on: ${message.time.slice(0, 10) } <span class='spacial'> at: ${message.time.slice(11, 19) }</span> </span>`);
+         $("#textdiv").append(` <li class='blueText'> <img src="//unsplash.it/50/50"/> ${message.name} </li>  <p class='blueText'> ${message.message} </p> <span class='blueText'>Posted on: ${datePartialDate} <span class='spacial'> at: ${datePartialTime}</span> </span><hr>`);
         $("#messages").scrollTop($("#textdiv").outerHeight());
     $("#textdiv").fadeOut(0).fadeIn(600);
       }
     else {
-       $("#textdiv").append(` <li class='greenText'> ${message.name}  <img src="//unsplash.it/50/50"/> </li> <p class='greenText' > ${message.message} </p> <span class='greenText'>Posted on:  ${message.time.slice(0, 10) } <span class='spacial'> at: ${message.time.slice(11, 19) }</span> </span>`);
+       $("#textdiv").append(` <li class='greenText'> ${message.name}  <img src="//unsplash.it/50/50"/> </li> <p class='greenText' > ${message.message} </p> <span class='greenText'>Posted on:  ${datePartialDate } <span class='spacial'> at: ${datePartialTime}</span> </span><hr>`);
        $("#messages").scrollTop($("#textdiv").outerHeight());
   $("#textdiv").fadeOut(0).fadeIn(600);
       }}
 
-  //function addMessages(message){
-//  const messageClass = message.user === currentUser ? 'blueText' : 'greenText'
 
-  //$("#messages").append(`<li class="${messageClass}"> ${message.name} </li> <p>
-//  ${message.message} </p> <span> ${message.id} </span>`)
-//}
       function getMessages(){
         $.get('http://localhost:3000/messages', (data) => {
 

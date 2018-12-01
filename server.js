@@ -22,7 +22,7 @@ var Message = mongoose.model('Message',{
 var dbUrl = 'mongodb://damir:2wsxzaq1@ds119374.mlab.com:19374/chatting';
 
 app.get('/messages', (req, res) => {
-  Message.find({},(err, messages)=> {
+  Message.find.limit(5)({},(err, messages)=> {
     res.send(messages);
   })
 })
@@ -63,24 +63,33 @@ app.post('/messages', async (req, res) => {
 
 
 io.on('connection', (socket) =>{
-  console.log('a user is connected', socket.id);
-  socket.emit('newEntry', { userID: socket.id,
+
+  io.sockets.emit('newEntry', { userID: socket.id,
      description: 'Has joined the chat room!'
 });
-  setTimeout(function() {
-    socket.emit('testerEvent', { description: 'A custom event named testerEvent!'});
- }, 4000);
 
- socket.on('clientEvent', function(data) {
-      console.log(data);
+ socket.on('newUser',function (username) {
+      socket.username = username;
+ });
+
   socket.on('disconnect', function(){
     console.log('user disconnected', socket.id);
-    socket.emit('leaving', { userID: socket.id,
+    if (socket.username == undefined) {
+      io.sockets.emit('leaving', { userID: "who values privacy",
+        description: 'Has left the chat room!'
+    });
+    }
+
+    else{
+      io.sockets.emit('leaving', { userID: socket.username,
       description: 'Has left the chat room!'
   });
+}
+
   });
-})
 });
+
+
 
 
 
